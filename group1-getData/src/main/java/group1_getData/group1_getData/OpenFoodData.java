@@ -3,6 +3,8 @@ package group1_getData.group1_getData;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -78,27 +80,72 @@ public class OpenFoodData {
     
     private void addDataToDB(JSONArray products){
     	// TODO: add data to db when webservice is done!
-    	// TODO: remove the displaying of all products
     	Iterator<Object> iterator = products.iterator();
 		
 		while(iterator.hasNext()){
 			productsNumber++;
 			JSONObject product = (JSONObject) iterator.next();
-			System.out.println(product.toString());
-			/*System.out.println("==============");
-			System.out.println("PRODUIT " + productsNumber);
-			System.out.println("==============");			
 			
-			//System.out.println(product.toString());
-			if(product.getJSONObject("name_translations").has("fr"))
-				System.out.println(product.getJSONObject("name_translations").getString("fr"));
-			if(product.getJSONObject("ingredients_translations").has("fr"))
-				System.out.println(product.getJSONObject("ingredients_translations").getString("fr"));
-			System.out.println(product.getInt("quantity"));
-			System.out.println(product.getString("unit"));
-			System.out.println(product.getInt("portion_quantity"));
-			System.out.println(product.getString("portion_unit"));*/
+			try {				
+				// Generate URL
+				URL url = new URL("http://localhost:8080/products");
+				
+				// Open the connection and add required request properties and set the method to "GET"
+				HttpURLConnection con = (HttpURLConnection) url.openConnection();
+				con.setDoOutput(true);
+				con.setRequestProperty("Content-Type", "application/json");
+				con.setRequestMethod("POST");
+				con.setConnectTimeout(5000);
+				con.setReadTimeout(5000);
+				con.connect();
+
+				OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+				   
+				String data = getProductAsJSON(product).toString();
+				System.out.println(data);
+				out.write(data);
+				out.close();
+				con.disconnect();
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}		
 		}
     }
+    
+    private JSONObject getProductAsJSON(JSONObject obj){
+    	JSONObject product = new JSONObject();
+    	JSONObject nutrient;
+    	
+    	product.put("name", (obj.getJSONObject("name_translations").has("fr") ? obj.getJSONObject("name_translations").get("fr") : ""));
+    	product.put("ingredients", (obj.getJSONObject("ingredients_translations").has("fr") ? obj.getJSONObject("ingredients_translations").get("fr") : ""));
+    	product.put("quantity", (obj.has("quantity") ? obj.get("quantity") : 0));
+    	product.put("unit", (obj.has("unit") ? obj.get("unit") : ""));
+    	product.put("portion_quantity", (obj.has("portion_quantity") ? obj.get("portion_quantity") : 0));
+    	product.put("portion_unit", (obj.has("portion_unit") ? obj.get("portion_unit") : ""));
+    	
+    	if(obj.has("nutrients")){
+    		JSONObject nutrients = obj.getJSONObject("nutrients");
+    		
+    		for (Object key : nutrients.keySet()) {
+    	        // get key and value
+    	        String keyName = (String)key;
+    	        JSONObject value = (JSONObject) nutrients.get(keyName);
 
+    	        nutrient = new JSONObject();
+    	        nutrient.put("name", (value.getJSONObject("name_translations").has("fr") ? value.getJSONObject("name_translations").get("fr") : ""));
+    	        nutrient.put("unit", (value.has("unit") ? value.get("unit") : ""));
+    	        nutrient.put("perHundred", (value.has("per_hundred") ? value.get("per_hundred") : 0));
+    	        nutrient.put("perPortion", (value.has("per_portion") ? value.get("per_portion") : 0));
+    	        nutrient.put("perDay", (value.has("per_day") ? value.get("per_day") : 0));
+
+    	        product.append("nutrients", nutrient);
+    	    }
+    	}
+    	
+    	return product;
+    }
 }
