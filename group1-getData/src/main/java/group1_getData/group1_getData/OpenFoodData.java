@@ -84,7 +84,8 @@ public class OpenFoodData {
 		while(iterator.hasNext()){
 			productsNumber++;
 			JSONObject product = (JSONObject) iterator.next();
-			System.out.println("==============");
+			System.out.println(product.toString());
+			/*System.out.println("==============");
 			System.out.println("PRODUIT " + productsNumber);
 			System.out.println("==============");			
 			
@@ -96,7 +97,7 @@ public class OpenFoodData {
 			System.out.println(product.getInt("quantity"));
 			System.out.println(product.getString("unit"));
 			System.out.println(product.getInt("portion_quantity"));
-			System.out.println(product.getString("portion_unit"));
+			System.out.println(product.getString("portion_unit"));*/
 		}
     }
 
