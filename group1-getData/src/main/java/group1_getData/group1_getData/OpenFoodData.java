@@ -11,7 +11,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Iterator;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -86,33 +91,18 @@ public class OpenFoodData {
 			productsNumber++;
 			JSONObject product = (JSONObject) iterator.next();
 			
-			try {				
-				// Generate URL
-				URL url = new URL("http://localhost:8080/products");
-				
-				// Open the connection and add required request properties and set the method to "GET"
-				HttpURLConnection con = (HttpURLConnection) url.openConnection();
-				con.setDoOutput(true);
-				con.setRequestProperty("Content-Type", "application/json");
-				con.setRequestMethod("POST");
-				con.setConnectTimeout(5000);
-				con.setReadTimeout(5000);
-				con.connect();
+			HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead 
 
-				OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
-				   
-				String data = getProductAsJSON(product).toString();
-				System.out.println(data);
-				out.write(data);
-				out.close();
-				con.disconnect();
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}		
+			try {
+
+			    HttpPost request = new HttpPost("http://localhost:8080/products");
+			    StringEntity params =new StringEntity(getProductAsJSON(product).toString(), "UTF-8");
+			    request.addHeader("content-type", "application/json;charset=UTF-8");
+			    request.setEntity(params);
+			    httpClient.execute(request);
+			}catch (Exception ex) {
+				System.out.println(ex.toString());
+			}
 		}
     }
     
