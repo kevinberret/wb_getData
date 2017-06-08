@@ -3,15 +3,12 @@ package group1_getData.group1_getData;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Iterator;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -23,7 +20,6 @@ import org.json.JSONObject;
 public class OpenFoodData {
 	private int pageSize = 200;
 	private int pageNumber = 1;
-	private int productsNumber = 0;
 	
 	public void getData(){
     	
@@ -88,7 +84,6 @@ public class OpenFoodData {
     	Iterator<Object> iterator = products.iterator();
 		
 		while(iterator.hasNext()){
-			productsNumber++;
 			JSONObject product = (JSONObject) iterator.next();
 			
 			HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead 
